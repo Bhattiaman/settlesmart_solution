@@ -11,19 +11,21 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference
+    // Theme preference
     const savedTheme = localStorage.getItem('theme');
     const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
     setDarkMode(isDark);
     document.documentElement.classList.toggle('dark', isDark);
-
-    // Scroll effect
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [menuOpen]);
+  
 
   const toggleDarkMode = () => {
     const newMode = !darkMode;
@@ -35,7 +37,6 @@ const Header = () => {
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const closeMenu = () => setMenuOpen(false);
 
-  // Reusable NavLink component
   const NavLink = ({ href, children }) => (
     <Link href={href} className="relative group">
       <span className="text-gray-700 dark:text-gray-300 font-medium hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
@@ -45,10 +46,9 @@ const Header = () => {
     </Link>
   );
 
-  // Mobile NavLink component
   const MobileNavLink = ({ href, children }) => (
     <Link 
-      href={href} 
+      href={href}
       onClick={closeMenu}
       className="text-gray-800 dark:text-gray-200 text-xl font-medium hover:text-amber-600 dark:hover:text-amber-400 transition-colors py-3 px-6 w-full text-center"
     >
@@ -56,7 +56,6 @@ const Header = () => {
     </Link>
   );
 
-  // SVG Logo Component
   const Logo = () => (
     <svg 
       width="120" 
@@ -66,12 +65,10 @@ const Header = () => {
       xmlns="http://www.w3.org/2000/svg"
       className="h-10 w-auto transition-transform hover:scale-105"
     >
-      {/* Logo text - changes color based on dark mode */}
       <path 
         d="M20 15V25H25V20H30V25H35V15H30V20H25V15H20ZM40 15V25H50V20H45V15H40ZM55 15V25H60V20H65V25H70V15H65V20H60V15H55ZM75 15V25H85V20H80V15H75Z" 
         fill={darkMode ? "#F59E0B" : "#1a3e72"} 
       />
-      {/* Scale icon - part of the logo */}
       <path 
         d="M100 25L110 20L100 15" 
         stroke={darkMode ? "#F59E0B" : "#1a3e72"} 
@@ -93,16 +90,13 @@ const Header = () => {
 
   return (
     <>
-      {/* Desktop Navigation */}
       <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm' : 'bg-white dark:bg-gray-900'}`}>
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center">
               <Logo />
             </Link>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <NavLink href="/">Home</NavLink>
               <NavLink href="/lawyer">Top Lawyers</NavLink>
@@ -113,7 +107,6 @@ const Header = () => {
               <NavLink href="/contact">Contact</NavLink>
             </div>
 
-            {/* Right side buttons */}
             <div className="hidden md:flex items-center space-x-4">
               <button
                 onClick={toggleDarkMode}
@@ -139,7 +132,6 @@ const Header = () => {
               </div>
             </div>
 
-            {/* Mobile menu button */}
             <button
               className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 focus:outline-none"
               onClick={toggleMenu}
@@ -151,11 +143,14 @@ const Header = () => {
           </div>
         </nav>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Navigation */}
         <div
-          className={`md:hidden fixed inset-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg transition-all duration-300 ease-in-out transform ${menuOpen ? 'translate-y-0' : '-translate-y-full'} flex flex-col items-center justify-center`}
+          className={`md:hidden fixed inset-0 z-40 transition-all duration-300 ease-in-out transform ${
+           menuOpen ? 'translate-y-0 opacity-100 pointer-events-auto' : '-translate-y-full opacity-0 pointer-events-none'
+           } bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg flex flex-col items-center justify-center`}
           aria-hidden={!menuOpen}
-        >
+>
+
           <button
             className="absolute top-4 right-4 p-2 rounded-full text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400"
             onClick={closeMenu}
@@ -200,7 +195,8 @@ const Header = () => {
           </div>
         </div>
       </header>
-      {/* Add padding to prevent content from being hidden behind the fixed header */}
+
+      {/* Push content below header */}
       <div className="h-16"></div>
     </>
   );
